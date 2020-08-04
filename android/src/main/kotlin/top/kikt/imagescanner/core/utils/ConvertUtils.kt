@@ -103,6 +103,12 @@ object ConvertUtils {
     val filterOptions = FilterCond()
     filterOptions.isShowTitle = map["title"] as Boolean
 
+    val fileTypeConstraint = FilterCond.FileTypeConstraint()
+    filterOptions.fileTypeConstraint = fileTypeConstraint
+    val fileTypeMap = map["fileTypes"] as Map<*, *>
+    fileTypeConstraint.only = fileTypeMap["only"] as List<String>
+    fileTypeConstraint.ignore = fileTypeMap["ignore"] as List<String>
+
     val sizeConstraint = FilterCond.SizeConstraint()
     filterOptions.sizeConstraint = sizeConstraint
     val sizeMap = map["size"] as Map<*, *>

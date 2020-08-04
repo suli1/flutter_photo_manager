@@ -173,12 +173,6 @@ class PhotoProvider extends ChangeNotifier {
       max: maxDuration,
     );
 
-    final option = FilterOption(
-      sizeConstraint: sizeConstraint,
-      durationConstraint: durationConstraint,
-      needTitle: needTitle,
-    );
-
     final dtCond = DateTimeCond(
       min: startDt,
       max: endDt,
@@ -186,9 +180,32 @@ class PhotoProvider extends ChangeNotifier {
     );
 
     return FilterOptionGroup()
-      ..setOption(AssetType.video, option)
-      ..setOption(AssetType.image, option)
-      ..setOption(AssetType.audio, option)
+      ..setOption(
+        AssetType.video,
+        FilterOption(
+          sizeConstraint: sizeConstraint,
+          durationConstraint: durationConstraint,
+          needTitle: needTitle,
+          fileTypeConstraint: FileTypeConstraint(only: ['mp4', 'avi']),
+        ),
+      )
+      ..setOption(
+        AssetType.image,
+        FilterOption(
+            sizeConstraint: sizeConstraint,
+            durationConstraint: durationConstraint,
+            needTitle: needTitle,
+            fileTypeConstraint: FileTypeConstraint(only: ['gif'])),
+      )
+      ..setOption(
+        AssetType.audio,
+        FilterOption(
+          sizeConstraint: sizeConstraint,
+          durationConstraint: durationConstraint,
+          needTitle: needTitle,
+          fileTypeConstraint: FileTypeConstraint(ignore: ['mp3']),
+        ),
+      )
       ..dateTimeCond = dtCond;
   }
 
@@ -214,6 +231,7 @@ class AssetPathProvider extends ChangeNotifier {
   bool isInit = false;
 
   final AssetPathEntity path;
+
   AssetPathProvider(this.path);
 
   List<AssetEntity> list = [];

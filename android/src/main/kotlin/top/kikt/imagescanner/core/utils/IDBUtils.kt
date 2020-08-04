@@ -6,7 +6,12 @@ import android.database.Cursor
 import android.net.Uri
 import android.os.Build
 import android.provider.MediaStore
-import android.provider.MediaStore.Files.FileColumns.*
+import android.provider.MediaStore.Files.FileColumns.DATE_ADDED
+import android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE
+import android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_AUDIO
+import android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_IMAGE
+import android.provider.MediaStore.Files.FileColumns.MEDIA_TYPE_VIDEO
+import android.provider.MediaStore.Files.FileColumns._ID
 import android.provider.MediaStore.VOLUME_EXTERNAL
 import androidx.exifinterface.media.ExifInterface
 import top.kikt.imagescanner.core.cache.CacheContainer
@@ -56,13 +61,13 @@ interface IDBUtils {
     )
 
     val typeKeys = arrayOf(
-            MEDIA_TYPE,
-            MediaStore.Images.Media.DISPLAY_NAME
+        MEDIA_TYPE,
+        MediaStore.Images.Media.DISPLAY_NAME
     )
 
     val storeBucketKeys = arrayOf(
-            MediaStore.Images.Media.BUCKET_ID,
-            MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME
+        MediaStore.Images.Media.BUCKET_ID,
+        MediaStore.Images.ImageColumns.BUCKET_DISPLAY_NAME
     )
 
     //    fun galleryIdKey(@MediaTypeDef mediaType: Int) :String{
@@ -97,7 +102,6 @@ interface IDBUtils {
       else -> 0
     }
   }
-
 
   fun convertTypeToMediaType(type: Int): Int {
     return when (type) {
@@ -197,7 +201,6 @@ interface IDBUtils {
     }
     val mediaType = MEDIA_TYPE
 
-
     var result = ""
 
     if (typeUtils.containsVideo(requestType)) {
@@ -240,6 +243,12 @@ interface IDBUtils {
         imageCondString = "$imageCondString AND $sizeCond"
         args.addAll(sizeArgs)
       }
+
+      val fileTypesArgs = imageCond.fileTypesArgs("image")
+      if (fileTypesArgs.isNotEmpty()) {
+        imageCondString = "$imageCondString AND ( ${imageCond.fileTypesCond()} )"
+        args.addAll(fileTypesArgs)
+      }
     }
 
     if (haveVideo) {
@@ -249,6 +258,12 @@ interface IDBUtils {
       videoCondString = "$typeKey = ? AND $durationCond"
       args.add(MEDIA_TYPE_VIDEO.toString())
       args.addAll(durationArgs)
+
+      val fileTypesArgs = videoCond.fileTypesArgs("video");
+      if (fileTypesArgs.isNotEmpty()) {
+        videoCondString = "$videoCondString AND ( ${videoCond.fileTypesCond()} )"
+        args.addAll(fileTypesArgs)
+      }
     }
 
     if (haveAudio) {
@@ -258,6 +273,12 @@ interface IDBUtils {
       audioCondString = "$typeKey = ? AND $durationCond"
       args.add(MEDIA_TYPE_AUDIO.toString())
       args.addAll(durationArgs)
+
+      val fileTypesArgs = audioCond.fileTypesArgs("audio");
+      if (fileTypesArgs.isNotEmpty()) {
+        audioCondString = "$audioCondString AND ( ${audioCond.fileTypesCond()} )"
+        args.addAll(fileTypesArgs)
+      }
     }
 
     if (haveImage) {

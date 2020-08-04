@@ -48,6 +48,9 @@ class FilterOption {
   /// This property affects performance on iOS. If not needed, please pass false, default is false.
   final bool needTitle;
 
+  /// Only select in [FileTypeConstraint]
+  final FileTypeConstraint fileTypeConstraint;
+
   /// See [SizeConstraint]
   final SizeConstraint sizeConstraint;
 
@@ -57,6 +60,7 @@ class FilterOption {
   /// See [needTitle], [sizeConstraint] and [durationConstraint]
   const FilterOption({
     this.needTitle = false,
+    this.fileTypeConstraint = const FileTypeConstraint(),
     this.sizeConstraint = const SizeConstraint(),
     this.durationConstraint = const DurationConstraint(),
   });
@@ -66,6 +70,7 @@ class FilterOption {
       "title": needTitle,
       "size": sizeConstraint.toMap(),
       "duration": durationConstraint.toMap(),
+      "fileTypes": fileTypeConstraint.toMap(),
     };
   }
 }
@@ -159,6 +164,26 @@ class DateTimeCond {
       "min": min.millisecondsSinceEpoch,
       "max": max.millisecondsSinceEpoch,
       "asc": asc,
+    };
+  }
+}
+
+/// Constraint of file type, use mime type suffix
+///
+/// Such as ['gif', 'png', 'jpeg']
+/// See [https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types]
+///
+/// Only one effective
+class FileTypeConstraint {
+  final List<String> only;
+  final List<String> ignore;
+
+  const FileTypeConstraint({this.only, this.ignore});
+
+  Map<String, dynamic> toMap() {
+    return {
+      "only": only ?? [],
+      "ignore": ignore ?? [],
     };
   }
 }
