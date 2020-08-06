@@ -56,13 +56,6 @@
          if (collection.assetCollectionSubtype == PHAssetCollectionSubtypeSmartAlbumUserLibrary) {
         
           PHFetchResult<PHAsset *> *assetResult = [PHAsset fetchAssetsInAssetCollection:collection options:assetOptions];
-          for (PHAsset *singleAsset in assetResult) {
-              NSString *filename = [singleAsset valueForKey:@"filename"];
-              NSLog(@"filename==%@",filename);
-              if (![filename hasSuffix:@"GIF"]) {
-    
-              }
-          }
           PMAssetPathEntity *pathEntity = [PMAssetPathEntity entityWithId:collection.localIdentifier name:collection.localizedTitle assetCount:assetResult.count];
           pathEntity.isAll = YES;
           [array addObject:pathEntity];
@@ -219,16 +212,21 @@
       NSString * filename = [asset valueForKey:@"filename"];
       NSString * suffix = [[filename componentsSeparatedByString:@"."] lastObject];
       NSString * lowSuffix = [suffix lowercaseString];
-      NSString * hightSuffix = [suffix uppercaseString];
+      NSString * upperSuffix = [suffix uppercaseString];
       NSArray * only = option.only;
       NSArray * ignore = option.ignore;
-      if ([only containsObject:lowSuffix] || [only containsObject:hightSuffix]) {
-          return YES;
-      }else if ([ignore containsObject:filename] || [ignore containsObject:hightSuffix] ){
-          return NO;
-      }else{
-          return NO;
+      if (only.count >0) {
+          if ([only containsObject:lowSuffix] || [only containsObject:upperSuffix]) {
+              return YES;
+          }
+      }else {
+         if (ignore.count > 0){
+            if ([ignore containsObject:lowSuffix] || [ignore containsObject:upperSuffix] ){
+               return NO;
+            }
+          }
       }
+      return YES;
 }
 - (NSArray<PMAssetEntity *> *)getAssetEntityListWithRange:(NSString *)id type:(NSUInteger)type start:(NSUInteger)start end:(NSUInteger)end filterOption:(PMFilterOptionGroup *)filterOption {
   NSMutableArray<PMAssetEntity *> *result = [NSMutableArray new];
