@@ -117,6 +117,8 @@
 + (PMFilterOption *)convertMapToPMFilterOption:(NSDictionary *)map {
   PMFilterOption *option = [PMFilterOption new];
   option.needTitle = [map[@"title"] boolValue];
+  option.only =  map[@"fileTypes"][@"only"];
+  option.ignore =  map[@"fileTypes"][@"ignore"];
 
   NSDictionary *sizeMap = map[@"size"];
   NSDictionary *durationMap = map[@"duration"];

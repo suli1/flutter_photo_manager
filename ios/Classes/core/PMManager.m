@@ -53,7 +53,8 @@
 
     if (result && result.count) {
       for (PHAssetCollection *collection in result) {
-        if (collection.assetCollectionSubtype == PHAssetCollectionSubtypeSmartAlbumUserLibrary) {
+         if (collection.assetCollectionSubtype == PHAssetCollectionSubtypeSmartAlbumUserLibrary) {
+        
           PHFetchResult<PHAsset *> *assetResult = [PHAsset fetchAssetsInAssetCollection:collection options:assetOptions];
           PMAssetPathEntity *pathEntity = [PMAssetPathEntity entityWithId:collection.localIdentifier name:collection.localizedTitle assetCount:assetResult.count];
           pathEntity.isAll = YES;
@@ -181,13 +182,52 @@
       needTitle = imageNeedTitle;
     }
     PMAssetEntity *entity = [self convertPHAssetToAssetEntity:asset needTitle:needTitle];
-    [result addObject:entity];
+    BOOL canAdd = [self filter:entity option:filterOption];
+    if(canAdd){
+        [result addObject:entity];
+    }
     [cacheContainer putAssetEntity:entity];
   }
 
   return result;
 }
+-(BOOL)filter:(PMAssetEntity*)entity  option:(PMFilterOptionGroup *)filterOption
+{
+    PHAsset * asset = entity.phAsset;
+    PMFilterOption *imageOption = filterOption.imageOption;
+    PMFilterOption *videoOption = filterOption.videoOption;
+    PMFilterOption *audioOption = filterOption.audioOption;
+    if (imageOption && asset.mediaType == PHAssetMediaTypeImage) {
+        return [self fliterPhAsset:entity.phAsset type:imageOption];
 
+    }else if (videoOption && asset.mediaType == PHAssetMediaTypeVideo){
+        return [self fliterPhAsset:entity.phAsset type:videoOption];
+
+    }else if (audioOption && asset.mediaType == PHAssetMediaTypeAudio){
+        return [self fliterPhAsset:entity.phAsset type:audioOption];
+    }
+    return YES;
+}
+-(BOOL)fliterPhAsset:(PHAsset*)asset  type:(PMFilterOption*)option{
+      NSString * filename = [asset valueForKey:@"filename"];
+      NSString * suffix = [[filename componentsSeparatedByString:@"."] lastObject];
+      NSString * lowSuffix = [suffix lowercaseString];
+      NSString * upperSuffix = [suffix uppercaseString];
+      NSArray * only = option.only;
+      NSArray * ignore = option.ignore;
+      if (only.count >0) {
+          if ([only containsObject:lowSuffix] || [only containsObject:upperSuffix]) {
+              return YES;
+          }
+      }else {
+         if (ignore.count > 0){
+            if ([ignore containsObject:lowSuffix] || [ignore containsObject:upperSuffix] ){
+               return NO;
+            }
+          }
+      }
+      return YES;
+}
 - (NSArray<PMAssetEntity *> *)getAssetEntityListWithRange:(NSString *)id type:(NSUInteger)type start:(NSUInteger)start end:(NSUInteger)end filterOption:(PMFilterOptionGroup *)filterOption {
   NSMutableArray<PMAssetEntity *> *result = [NSMutableArray new];
 
@@ -232,7 +272,10 @@
     }
 
     PMAssetEntity *entity = [self convertPHAssetToAssetEntity:asset needTitle:needTitle];
-    [result addObject:entity];
+    BOOL canAdd = [self filter:entity option:filterOption];
+    if(canAdd){
+        [result addObject:entity];
+    }
     [cacheContainer putAssetEntity:entity];
   }
 
@@ -699,13 +742,12 @@
     [args addObjectsFromArray:durationArgs];
 
     NSLog(@"duration = %.2f ~ %.2f", [durationArgs[0] floatValue], [durationArgs[1] floatValue]);
-
     [cond appendString:@" ) "];
   }
 
+  
   [cond insertString:@"(" atIndex:0];
   [cond appendString:@")"];
-
   PMDateOption *dateOption = optionGroup.dateOption;
   [cond appendString:[dateOption dateCond]];
   [args addObjectsFromArray:[dateOption dateArgs]];
