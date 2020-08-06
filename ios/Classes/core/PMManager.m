@@ -201,43 +201,34 @@
 -(BOOL)filter:(PMAssetEntity*)entity  option:(PMFilterOptionGroup *)filterOption
 {
     PHAsset * asset = entity.phAsset;
-    NSString * filename = [asset valueForKey:@"filename"];
-    
     PMFilterOption *imageOption = filterOption.imageOption;
     PMFilterOption *videoOption = filterOption.videoOption;
     PMFilterOption *audioOption = filterOption.audioOption;
     if (imageOption && asset.mediaType == PHAssetMediaTypeImage) {
-        NSArray * only = imageOption.only;
-        NSArray * ignore = imageOption.ignore;
-        if ([only containsObject:filename]) {
-            return YES;
-        }else if ([ignore containsObject:filename]){
-           return NO;
-        }else{
-           return YES;
-        }
+        return [self fliterPhAsset:entity.phAsset type:imageOption];
+
     }else if (videoOption && asset.mediaType == PHAssetMediaTypeVideo){
-        NSArray * only = videoOption.only;
-        NSArray * ignore = videoOption.ignore;
-        if ([only containsObject:filename]) {
-            return YES;
-        }else if ([ignore containsObject:filename]){
-           return NO;
-        }else{
-           return YES;
-        }
+        return [self fliterPhAsset:entity.phAsset type:videoOption];
+
     }else if (audioOption && asset.mediaType == PHAssetMediaTypeAudio){
-        NSArray * only = audioOption.only;
-        NSArray * ignore = audioOption.ignore;
-        if ([only containsObject:filename]) {
-            return YES;
-        }else if ([ignore containsObject:filename]){
-            return NO;
-        }else{
-           return YES;
-        }
+        return [self fliterPhAsset:entity.phAsset type:audioOption];
     }
     return YES;
+}
+-(BOOL)fliterPhAsset:(PHAsset*)asset  type:(PMFilterOption*)option{
+      NSString * filename = [asset valueForKey:@"filename"];
+      NSString * suffix = [[filename componentsSeparatedByString:@"."] lastObject];
+      NSString * lowSuffix = [suffix lowercaseString];
+      NSString * hightSuffix = [suffix uppercaseString];
+      NSArray * only = option.only;
+      NSArray * ignore = option.ignore;
+      if ([only containsObject:lowSuffix] || [only containsObject:hightSuffix]) {
+          return YES;
+      }else if ([ignore containsObject:filename] || [ignore containsObject:hightSuffix] ){
+          return NO;
+      }else{
+          return NO;
+      }
 }
 - (NSArray<PMAssetEntity *> *)getAssetEntityListWithRange:(NSString *)id type:(NSUInteger)type start:(NSUInteger)start end:(NSUInteger)end filterOption:(PMFilterOptionGroup *)filterOption {
   NSMutableArray<PMAssetEntity *> *result = [NSMutableArray new];
