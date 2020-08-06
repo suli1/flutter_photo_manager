@@ -274,7 +274,10 @@
     }
 
     PMAssetEntity *entity = [self convertPHAssetToAssetEntity:asset needTitle:needTitle];
-    [result addObject:entity];
+    BOOL canAdd = [self filter:entity option:filterOption];
+    if(canAdd){
+        [result addObject:entity];
+    }
     [cacheContainer putAssetEntity:entity];
   }
 
