@@ -34,11 +34,15 @@ typedef struct PMDurationConstraint {
 
 } PMDurationConstraint;
 
+
 @interface PMFilterOption : NSObject
 
 @property(nonatomic, assign) BOOL needTitle;
 @property(nonatomic, assign) PMSizeConstraint sizeConstraint;
 @property(nonatomic, assign) PMDurationConstraint durationConstraint;
+
+@property(nonatomic, strong) NSArray *only;
+@property(nonatomic, strong) NSArray *ignore;
 
 - (NSString *)sizeCond;
 
